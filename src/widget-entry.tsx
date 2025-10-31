@@ -4,7 +4,7 @@ import { initChatbot } from './widget-init';
 
 const chatWidget = r2wc(ChatWidget, {
   props: {
-    chatbotId: 'string',
+    ticketdeskId: 'string',
   },
 });
 
@@ -13,7 +13,7 @@ customElements.define('ticketdesk-chatbot', chatWidget);
 // Attach popup API globally
 declare global {
   interface Window {
-    TICKETDESK_CHATBOT_ID?: string;
+    TICKETDESK_ID?: string;
     ticketdesk: {
       initChatbot: typeof initChatbot;
     };
@@ -25,6 +25,6 @@ window.ticketdesk = {
 };
 
 // Auto-init if chatbotId is provided
-if (window.TICKETDESK_CHATBOT_ID) {
-  window.ticketdesk.initChatbot(window.TICKETDESK_CHATBOT_ID);
+if (window.TICKETDESK_ID) {
+  window.ticketdesk.initChatbot(window.TICKETDESK_ID);
 }

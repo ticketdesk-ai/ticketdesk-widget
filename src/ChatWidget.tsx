@@ -13,7 +13,7 @@ function normalizeTailwind(css: string): string {
     .replaceAll('(-webkit-hyphens: none) and ', '');
 }
 
-export function ChatWidget({ chatbotId }: { chatbotId: string }) {
+export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const {
@@ -33,7 +33,7 @@ export function ChatWidget({ chatbotId }: { chatbotId: string }) {
     operators,
     lastActive,
   } = useChatHook({
-    chatbotId,
+    ticketdeskId,
   });
 
   if (isLoading === true || !config) {
@@ -51,7 +51,7 @@ export function ChatWidget({ chatbotId }: { chatbotId: string }) {
       />
 
       <ChatWindow
-        chatbotId={chatbotId}
+        ticketdeskId={ticketdeskId}
         isOpen={isOpen}
         isMaximized={isMaximized}
         isConnected={isConnected}

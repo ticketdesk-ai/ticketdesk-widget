@@ -2,9 +2,7 @@ import { useState } from 'react';
 import { ChatWidget } from './ChatWidget';
 
 function App() {
-  const [chatbotId] = useState<string>(
-    'cb_260c0ee4-387d-47fe-b345-3dff86aed49b'
-  );
+  const [ticketdeskId] = useState<string>('s-2b08465216_cb-syapbp8zt5');
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -34,30 +32,28 @@ function App() {
             </li>
             <li>Create a chatbot from the dashboard.</li>
             <li>
-              Copy the <span className="font-medium">Chatbot ID</span> (looks
+              Copy the <span className="font-medium">Ticketdesk ID</span> (looks
               like
               <code className="bg-gray-200 px-1 py-0.5 rounded">
-                cb_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+                s-xxxxxxx_cb-xxxxxxxx
               </code>
               ).
             </li>
             <li>Paste it into the script below, replacing the sample ID:</li>
           </ol>
 
-          <pre
-          className="bg-gray-900 text-green-300 p-4 rounded-lg overflow-x-auto text-sm whitespace-pre"
-        >
-<code>
-&lt;script&gt;
-  window.TICKETDESK_CHATBOT_ID = 'cb_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
-&lt;/script&gt;
-&lt;script src="./dist/ticketdesk-chatbot.umd.cjs"&gt;&lt;/script&gt;
-</code>
-</pre>
+          <pre className="bg-gray-900 text-green-300 p-4 rounded-lg overflow-x-auto text-sm whitespace-pre">
+            <code>
+              &lt;script&gt; window.TICKETDESK_CHATBOT_ID =
+              's-xxxxxxx_cb-xxxxxxxx'; &lt;/script&gt;
+              &lt;script
+              src="./dist/ticketdesk-chatbot.umd.cjs"&gt;&lt;/script&gt;
+            </code>
+          </pre>
         </div>
       </div>
 
-      <ChatWidget {...{ chatbotId: chatbotId }} />
+      <ChatWidget {...{ ticketdeskId: ticketdeskId }} />
     </div>
   );
 }

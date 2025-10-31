@@ -25,7 +25,8 @@ const generateId = (): string => {
   return `m_` + crypto.randomUUID();
 };
 
-export function useChatHook({ chatbotId }: { chatbotId: string }) {
+export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
+  const [roomId, siteId] = ticketdeskId.split('_');
   const [config, setConfig] = useState<ChatBotConfig>({
     name: 'Chat with us',
     color: '#3b82f6',
@@ -48,17 +49,18 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
       ? 'https://api.ticketdesk.ai'
       : 'http://localhost:8787',
     party: 'chatroom',
-    room: chatbotId,
+    room: roomId,
     onOpen() {
       // Get existing session data from localStorage
-      const existingSessionId = getLocalStorage(`ti_${chatbotId}_session_id`);
-      const existingClientId = getLocalStorage(`ti_${chatbotId}_client_id`);
+      const existingSessionId = getLocalStorage(`ti_${siteId}_session_id`);
+      const existingClientId = getLocalStorage(`ti_${siteId}_client_id`);
 
       // Send session:join message
       const joinPayload = {
         type: 'session:join',
         client_id: existingClientId,
         session_id: existingSessionId,
+        site_id: siteId,
       };
 
       socket.send(JSON.stringify(joinPayload));
@@ -70,12 +72,12 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
         // Server sends back session details
         if (data.session_id) {
           setSessionId(data.session_id);
-          setLocalStorage(`ti_${chatbotId}_session_id`, data.session_id);
+          setLocalStorage(`ti_${siteId}_session_id`, data.session_id);
         }
 
         if (data.client_id) {
           setClientId(data.client_id);
-          setLocalStorage(`ti_${chatbotId}_client_id`, data.client_id);
+          setLocalStorage(`ti_${siteId}_client_id`, data.client_id);
         }
         setMessages(data.messages || []);
         setSelectedSession(data.session);
@@ -119,8 +121,8 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
 
   useEffect(() => {
     // Load existing session data on mount
-    const existingSessionId = getLocalStorage(`ti_${chatbotId}_session_id`);
-    const existingClientId = getLocalStorage(`ti_${chatbotId}_client_id`);
+    const existingSessionId = getLocalStorage(`ti_${siteId}_session_id`);
+    const existingClientId = getLocalStorage(`ti_${siteId}_client_id`);
 
     if (existingSessionId) {
       setSessionId(existingSessionId);
@@ -141,7 +143,7 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
       };
       setMessages([welcomeMessage]);
     }
-  }, [chatbotId, config?.welcome_message]);
+  }, [siteId, config?.welcome_message]);
 
   const sendMessage = useCallback(
     (newMessage: Message) => {
@@ -181,12 +183,20 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
           type: 'message:new',
           session_id: sessionId,
           client_id: clientId,
+          site_id: siteId,
           message: newMessage,
         };
         socket.send(JSON.stringify(messagePayload));
       }
     },
-    [sessionId, clientId, socket, selectedSession, config.fields?.length]
+    [
+      sessionId,
+      clientId,
+      socket,
+      selectedSession,
+      config.fields?.length,
+      siteId,
+    ]
   );
 
   const sendFile = useCallback(
@@ -218,7 +228,7 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
         // For demo purposes, we'll simulate a file upload
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('chatbotId', chatbotId);
+        formData.append('site_id', siteId);
         formData.append('session_id', sessionId);
         formData.append('client_id', clientId);
 
@@ -281,7 +291,7 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
         );
       }
     },
-    [socket, sessionId, clientId, chatbotId]
+    [socket, sessionId, clientId, siteId]
   );
 
   const startNewChat = useCallback(() => {
@@ -294,6 +304,7 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
       const newSessionPayload = {
         type: 'session:new',
         client_id: clientId,
+        site_id: siteId,
       };
 
       socket.send(JSON.stringify(newSessionPayload));
@@ -312,7 +323,7 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
         }, 100);
       }
     }
-  }, [socket, clientId, config?.welcome_message]);
+  }, [socket, clientId, siteId, config.welcome_message]);
 
   const endCurrentChat = useCallback(() => {
     if (socket && sessionId) {
@@ -333,13 +344,14 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
           type: 'session:join',
           session_id: sessionId,
           client_id: clientId,
+          site_id: siteId,
         };
 
         socket.send(JSON.stringify(loadSessionPayload));
         setSessionId(sessionId);
       }
     },
-    [socket, clientId]
+    [socket, clientId, siteId]
   );
 
   const getRecentChats = useCallback(() => {
@@ -347,11 +359,12 @@ export function useChatHook({ chatbotId }: { chatbotId: string }) {
       const getSessionsPayload = {
         type: 'session:list',
         client_id: clientId,
+        site_id: siteId,
       };
 
       socket.send(JSON.stringify(getSessionsPayload));
     }
-  }, [socket, clientId]);
+  }, [socket, clientId, siteId]);
 
   const updateProfile = useCallback(
     (data: Record<string, string>) => {

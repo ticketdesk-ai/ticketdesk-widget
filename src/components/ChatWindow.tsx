@@ -8,7 +8,7 @@ import { useState } from 'react';
 import type { ChatBotConfig } from '../types/widget';
 
 interface ChatWindowProps {
-  chatbotId: string;
+  ticketdeskId: string;
   isOpen: boolean;
   isMaximized: boolean;
   isConnected: boolean;
@@ -34,7 +34,7 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({
-  chatbotId,
+  ticketdeskId,
   isOpen,
   isMaximized,
   isConnected,
@@ -125,7 +125,7 @@ export function ChatWindow({
           )}
 
           <MessageInput
-            chatbotId={chatbotId}
+            ticketdeskId={ticketdeskId}
             config={config}
             selectedSession={selectedSession}
             onSendMessage={onSendMessage}

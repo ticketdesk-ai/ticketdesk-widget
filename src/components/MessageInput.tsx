@@ -5,14 +5,14 @@ import type { ChatBotConfig, ChatSession, Message } from '../types/widget';
 import { AudioRecorder } from './AudioRecorder';
 
 interface MessageInputProps {
-  chatbotId: string;
+  ticketdeskId: string;
   selectedSession: ChatSession | null;
   config: ChatBotConfig;
   onSendMessage: (message: Message) => void;
 }
 
 export function MessageInput({
-  chatbotId,
+  ticketdeskId,
   selectedSession,
   config,
   onSendMessage,
@@ -45,7 +45,7 @@ export function MessageInput({
     const formData = new FormData();
     formData.append('file', file);
     const response = await fetch(
-      `https://api.ticketdesk.ai/v1/uploader?session_id=${selectedSession?.session_id}&site_id=${chatbotId}`,
+      `https://api.ticketdesk.ai/v1/uploader?session_id=${selectedSession?.session_id}&id=${ticketdeskId}`,
       {
         method: 'POST',
         body: formData,
