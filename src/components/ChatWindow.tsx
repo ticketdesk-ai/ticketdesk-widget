@@ -6,6 +6,7 @@ import { RecentChats } from './RecentChats';
 import { EmailWarning } from './EmailWarning';
 import { useState } from 'react';
 import type { ChatBotConfig } from '../types/widget';
+import { AlertCircle } from 'lucide-react';
 
 interface ChatWindowProps {
   ticketdeskId: string;
@@ -27,6 +28,8 @@ interface ChatWindowProps {
     email?: string;
     phone?: string;
   }) => void;
+  errorMessage: string | null;
+  setErrorMessage: (value: string) => void;
   onClose: () => void;
   onToggleMaximize: () => void;
   onSendMessage: (message: Message) => void;
@@ -49,6 +52,8 @@ export function ChatWindow({
   onLoadSession,
   onGetRecentChats,
   onUpdateProfile,
+  errorMessage,
+  setErrorMessage,
   onClose,
   onToggleMaximize,
   onSendMessage,
@@ -119,9 +124,15 @@ export function ChatWindow({
             config={config}
           />
 
-          {/* Email warning at bottom */}
           {hasEmailWarning && (
             <EmailWarning config={config} onFormSubmit={handleProfileUpdate} />
+          )}
+
+          {errorMessage && (
+            <div className="px-6 py-3 bg-red-100 text-sm border-t border-red-200 text-red-800 hover:text-red-900 flex items-center gap-2 text-left">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              {errorMessage}
+            </div>
           )}
 
           <MessageInput
@@ -129,6 +140,7 @@ export function ChatWindow({
             config={config}
             selectedSession={selectedSession}
             onSendMessage={onSendMessage}
+            onError={setErrorMessage}
           />
         </>
       )}

@@ -9,6 +9,7 @@ interface MessageInputProps {
   selectedSession: ChatSession | null;
   config: ChatBotConfig;
   onSendMessage: (message: Message) => void;
+  onError: (value: string) => void;
 }
 
 export function MessageInput({
@@ -16,6 +17,7 @@ export function MessageInput({
   selectedSession,
   config,
   onSendMessage,
+  onError,
 }: MessageInputProps) {
   const [input, setInput] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -62,6 +64,8 @@ export function MessageInput({
     setIsUploading(true);
     try {
       const fileResponse = await fileUploader(file);
+      if (fileResponse && typeof fileResponse !== 'object') return;
+
       const newMessage: Message = {
         from: 'user',
         content: file.name,
@@ -73,11 +77,11 @@ export function MessageInput({
             : 'file',
         timestamp: Date.now(),
         status: 'sent',
-        file: fileResponse,
+        file: fileResponse.url,
       };
       onSendMessage(newMessage);
     } catch (error) {
-      console.error('File upload failed:', error);
+      onError(`File upload failed: ${error}`);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -156,7 +160,9 @@ export function MessageInput({
               onClose={() => setShowEmojiPicker(false)}
             />
           )}
-          {isUploading && <span className='text-sm text-gray-700'>Uploading...</span>}
+          {isUploading && (
+            <span className="text-sm text-gray-700">Uploading...</span>
+          )}
         </div>
 
         {/* Right side: powered by */}
@@ -165,9 +171,9 @@ export function MessageInput({
             href="https://ticketdesk.ai/?utm_source=chat-widget&utm_medium=referral&utm_campaign=powered-by"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-xs text-gray-500"
           >
-            Powered by <span className="font-semibold">Ticketdesk AI</span>
+            Powered by <span className="font-semibold text-gray-700 hover:text-gray-800 transition-colors">Ticketdesk AI</span>
           </a>
         </div>
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChatWidget } from './ChatWidget';
 
 function App() {
-  const [ticketdeskId] = useState<string>('s-2b08465216_cb-syapbp8zt5');
+  const [ticketdeskId] = useState<string>('d-2b08465216_s-xdxugyq0ni');
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -23,7 +23,7 @@ function App() {
               Login to your{' '}
               <a
                 className="font-medium text-blue-600"
-                href="https://app.ticketdesk.ai/settings/chatbots"
+                href="https://app.ticketdesk.ai/settings"
                 target="_blank"
               >
                 Ticketdesk AI

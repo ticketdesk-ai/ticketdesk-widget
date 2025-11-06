@@ -25,6 +25,8 @@ export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
     loadSession,
     getRecentChats,
     updateProfile,
+    errorMessage,
+    setErrorMessage,
     sessions,
     selectedSession,
     isConnected,
@@ -66,6 +68,8 @@ export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
         onLoadSession={loadSession}
         onGetRecentChats={getRecentChats}
         onUpdateProfile={updateProfile}
+        errorMessage={errorMessage}
+        setErrorMessage={setErrorMessage}
         onClose={() => setIsOpen(false)}
         onToggleMaximize={() => setIsMaximized(!isMaximized)}
         onSendMessage={sendMessage}

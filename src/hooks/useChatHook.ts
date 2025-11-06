@@ -40,6 +40,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [operators, setOperators] = useState<ChatOperator[]>([]);
   const [lastActive, setLastActive] = useState<number | undefined>();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(
     null
   );
@@ -66,9 +67,11 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
       socket.send(JSON.stringify(joinPayload));
     },
     onMessage(e) {
-      const { type, data } = JSON.parse(e.data);
+      const { type, data, error } = JSON.parse(e.data);
 
-      if (type === 'session:joined') {
+      if (type === 'error' && error) {
+        setErrorMessage(error);
+      } else if (type === 'session:joined') {
         // Server sends back session details
         if (data.session_id) {
           setSessionId(data.session_id);
@@ -260,6 +263,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
             type: 'message:file',
             session_id: sessionId,
             client_id: clientId,
+            site_id: siteId,
             message: {
               id: fileMessage.id,
               from: 'user',
@@ -328,14 +332,16 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
   const endCurrentChat = useCallback(() => {
     if (socket && sessionId) {
       const endSessionPayload = {
-        type: 'session:end',
+        type: 'session:state',
         session_id: sessionId,
         client_id: clientId,
+        site_id: siteId,
+        state: 'resolved',
       };
 
       socket.send(JSON.stringify(endSessionPayload));
     }
-  }, [socket, sessionId, clientId]);
+  }, [socket, sessionId, siteId, clientId]);
 
   const loadSession = useCallback(
     (sessionId: string) => {
@@ -373,11 +379,11 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
           type: 'session:update',
           client_id: clientId,
           session_id: sessionId,
+          site_id: siteId,
           data: data,
         };
         socket.send(JSON.stringify(updateProfilePayload));
       }
-
       setSelectedSession((prev) =>
         prev
           ? {
@@ -387,7 +393,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
           : prev
       );
     },
-    [socket, clientId, sessionId]
+    [socket, clientId, siteId, sessionId]
   );
 
   const retryMessage = useCallback(
@@ -414,6 +420,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
               type: 'message:file',
               session_id: sessionId,
               client_id: clientId,
+              site_id: siteId,
               message: {
                 id: message.id,
                 from: 'user',
@@ -430,6 +437,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
               type: 'message:new',
               session_id: sessionId,
               client_id: clientId,
+              site_id: siteId,
               message: {
                 id: message.id,
                 from: 'user',
@@ -451,7 +459,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
         }
       }
     },
-    [messages, sessionId, clientId, socket]
+    [messages, sessionId, clientId, siteId, socket]
   );
 
   return {
@@ -464,6 +472,8 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
     loadSession,
     getRecentChats,
     updateProfile,
+    errorMessage,
+    setErrorMessage,
     sessions,
     selectedSession,
     isConnected: !!socket,
