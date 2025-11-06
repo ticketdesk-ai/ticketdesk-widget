@@ -19,6 +19,7 @@ export function MessageInput({
   onSendMessage,
   onError,
 }: MessageInputProps) {
+  const [, siteId] = ticketdeskId.split('_');
   const [input, setInput] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,7 +48,7 @@ export function MessageInput({
     const formData = new FormData();
     formData.append('file', file);
     const response = await fetch(
-      `https://api.ticketdesk.ai/v1/uploader?session_id=${selectedSession?.session_id}&id=${ticketdeskId}`,
+      `https://api.ticketdesk.ai/v1/uploader?session_id=${selectedSession?.session_id}&site_id=${siteId}`,
       {
         method: 'POST',
         body: formData,
@@ -173,7 +174,10 @@ export function MessageInput({
             rel="noopener noreferrer"
             className="text-xs text-gray-500"
           >
-            Powered by <span className="font-semibold text-gray-700 hover:text-gray-800 transition-colors">Ticketdesk AI</span>
+            Powered by{' '}
+            <span className="font-semibold text-gray-700 hover:text-gray-800 transition-colors">
+              Ticketdesk AI
+            </span>
           </a>
         </div>
 
