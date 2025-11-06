@@ -202,102 +202,6 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
     ]
   );
 
-  const sendFile = useCallback(
-    async (file: File) => {
-      // Don't send files if we don't have session details yet
-      if (!sessionId || !clientId) {
-        console.log('No session details yet, cannot send file');
-        return;
-      }
-
-      // Create a file message
-      const fileMessage: Message = {
-        id: generateId(),
-        from: 'user',
-        content: `Uploading ${file.name}...`,
-        type: 'file',
-        timestamp: Date.now(),
-        status: socket ? 'sent' : 'failed',
-        file: {
-          name: file.name,
-          type: file.type,
-        },
-      };
-
-      setMessages((prev) => [...prev, fileMessage]);
-
-      try {
-        // In a real implementation, you would upload the file to your server
-        // For demo purposes, we'll simulate a file upload
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('site_id', siteId);
-        formData.append('session_id', sessionId);
-        formData.append('client_id', clientId);
-
-        // Simulate upload delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Update message with file URL (simulated)
-        const fileUrl = URL.createObjectURL(file);
-
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === fileMessage.id
-              ? {
-                  ...msg,
-                  content: '',
-                  status: 'sent',
-                  file: {
-                    ...msg.file!,
-                    url: fileUrl,
-                  },
-                }
-              : msg
-          )
-        );
-
-        // Send file info to server if connected
-        if (socket) {
-          const filePayload = {
-            type: 'message:file',
-            session_id: sessionId,
-            client_id: clientId,
-            site_id: siteId,
-            message: {
-              id: fileMessage.id,
-              from: 'user',
-              type: 'file',
-              timestamp: Date.now(),
-              file: {
-                name: file.name,
-                type: file.type,
-                url: fileUrl,
-              },
-            },
-          };
-
-          socket.send(JSON.stringify(filePayload));
-        }
-      } catch (error: unknown) {
-        console.log('Error', error);
-        // Update message status to failed
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === fileMessage.id
-              ? {
-                  ...msg,
-                  status: 'failed',
-                  content: `Failed to upload ${file.name}`,
-                }
-              : msg
-          )
-        );
-      }
-    },
-    [socket, sessionId, clientId, siteId]
-  );
-
   const startNewChat = useCallback(() => {
     if (socket) {
       // Clear current messages
@@ -465,7 +369,6 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
   return {
     messages,
     sendMessage,
-    sendFile,
     retryMessage,
     startNewChat,
     endCurrentChat,
