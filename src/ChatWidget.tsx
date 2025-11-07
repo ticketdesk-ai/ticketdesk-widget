@@ -38,6 +38,13 @@ export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
     ticketdeskId,
   });
 
+  const toggleChatbox = (open: boolean) => {
+    if (open) {
+      loadSession();
+    }
+    setIsOpen(open);
+  };
+
   if (isLoading === true || !config) {
     return null;
   }
@@ -48,7 +55,7 @@ export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
 
       <ChatButton
         isOpen={isOpen}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => toggleChatbox(!isOpen)}
         config={config}
       />
 

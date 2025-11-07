@@ -78,7 +78,7 @@ export function MessageInput({
             : 'file',
         timestamp: Date.now(),
         status: 'sent',
-        file: fileResponse.url,
+        file: fileResponse,
       };
       onSendMessage(newMessage);
     } catch (error) {

@@ -51,26 +51,33 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
       : 'http://localhost:8787',
     party: 'chatroom',
     room: roomId,
+    query: {
+      site_id: siteId,
+      session_id: getLocalStorage(`ti_${siteId}_session_id`),
+    },
     onOpen() {
-      // Get existing session data from localStorage
-      const existingSessionId = getLocalStorage(`ti_${siteId}_session_id`);
-      const existingClientId = getLocalStorage(`ti_${siteId}_client_id`);
-
       // Send session:join message
-      const joinPayload = {
-        type: 'session:join',
-        client_id: existingClientId,
-        session_id: existingSessionId,
-        site_id: siteId,
-      };
-
-      socket.send(JSON.stringify(joinPayload));
+      // const joinPayload = {
+      //   type: 'session:join',
+      //   client_id: existingClientId,
+      //   session_id: existingSessionId,
+      //   site_id: siteId,
+      // };
+      // socket.send(JSON.stringify(joinPayload));
     },
     onMessage(e) {
       const { type, data, error } = JSON.parse(e.data);
 
       if (type === 'error' && error) {
         setErrorMessage(error);
+      } else if (type === 'session:connected') {
+        setConfig({
+          color: '#3b82f6',
+          shape: 'round',
+          welcome_message: 'Hi! How can I help you today?',
+          ...data.config,
+        });
+        setIsLoading(false);
       } else if (type === 'session:joined') {
         // Server sends back session details
         if (data.session_id) {
@@ -90,15 +97,6 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
         if (data.last_active) {
           setLastActive(data.last_active);
         }
-        // Connected with server
-        setConfig({
-          color: '#3b82f6',
-          shape: 'round',
-          welcome_message: 'Hi! How can I help you today?',
-          ...data.config,
-        });
-
-        setIsLoading(false);
       } else if (type === 'session:list') {
         setSessions(data.sessions);
       } else if (type === 'message:recieved') {
@@ -248,17 +246,23 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
   }, [socket, sessionId, siteId, clientId]);
 
   const loadSession = useCallback(
-    (sessionId: string) => {
+    (sessionId: string | null = null) => {
       if (socket) {
+        const existingSessionId = getLocalStorage(`ti_${siteId}_session_id`);
+        const existingClientId = getLocalStorage(`ti_${siteId}_client_id`);
+
         const loadSessionPayload = {
           type: 'session:join',
-          session_id: sessionId,
-          client_id: clientId,
+          session_id: sessionId || existingSessionId,
+          client_id: clientId || existingClientId,
           site_id: siteId,
         };
 
         socket.send(JSON.stringify(loadSessionPayload));
-        setSessionId(sessionId);
+        
+        if (sessionId) {
+          setSessionId(sessionId);
+        }
       }
     },
     [socket, clientId, siteId]
@@ -365,6 +369,34 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
     },
     [messages, sessionId, clientId, siteId, socket]
   );
+
+  // const setAvailability = useCallback(
+  //   (status: 'online' | 'away') => {
+  //     const payload = {
+  //       type: 'availability',
+  //       status,
+  //       site_id: siteId,
+  //       client_id: clientId,
+  //     };
+  //     socket.send(JSON.stringify(payload));
+  //   },
+  //   [clientId, siteId, socket]
+  // );
+
+  // // Handle tab visibility
+  // useEffect(() => {
+  //   const handleVisibilityChange = () => {
+  //     if (document.visibilityState === 'visible') {
+  //       setAvailability('online');
+  //     } else {
+  //       setAvailability('away');
+  //     }
+  //   };
+  //   document.addEventListener('visibilitychange', handleVisibilityChange);
+  //   return () => {
+  //     document.removeEventListener('visibilitychange', handleVisibilityChange);
+  //   };
+  // }, [socket, siteId, roomId, setAvailability]);
 
   return {
     messages,
