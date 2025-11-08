@@ -33,7 +33,6 @@ interface ChatWindowProps {
   onClose: () => void;
   onToggleMaximize: () => void;
   onSendMessage: (message: Message) => void;
-  onRetryMessage: (messageId: string) => void;
 }
 
 export function ChatWindow({
@@ -57,7 +56,6 @@ export function ChatWindow({
   onClose,
   onToggleMaximize,
   onSendMessage,
-  onRetryMessage,
 }: ChatWindowProps) {
   const [currentView, setCurrentView] = useState<'chat' | 'recent-chats'>(
     'chat'
@@ -119,9 +117,9 @@ export function ChatWindow({
         <>
           <MessageList
             messages={messages}
-            onRetryMessage={onRetryMessage}
             onFormSubmit={handleProfileUpdate}
             config={config}
+            onSendMessage={onSendMessage}
           />
 
           {hasEmailWarning && (

@@ -6,16 +6,16 @@ import type { ChatBotConfig } from '../types/widget';
 
 interface MessageListProps {
   messages: Message[];
-  onRetryMessage: (messageId: string) => void;
   onFormSubmit: (data: Record<string, string>) => void;
   config: ChatBotConfig;
+  onSendMessage: (message: Message) => void;
 }
 
 export function MessageList({
   messages,
-  onRetryMessage,
   onFormSubmit,
   config,
+  onSendMessage,
 }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -101,7 +101,7 @@ export function MessageList({
                 timestamp={message.timestamp}
                 onRetry={
                   message.status === 'failed'
-                    ? () => onRetryMessage(message.id!)
+                    ? () => onSendMessage(message)
                     : undefined
                 }
               />

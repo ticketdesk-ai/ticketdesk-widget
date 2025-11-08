@@ -4,6 +4,7 @@ import { ChatWindow } from './components/ChatWindow';
 import { useChatHook } from './hooks/useChatHook';
 import shadow from 'react-shadow';
 import styles from './index.css?inline';
+import { getLocalStorage } from './utils/helper';
 
 // --- Tailwind normalizer for ShadowRoot ---
 function normalizeTailwind(css: string): string {
@@ -14,12 +15,12 @@ function normalizeTailwind(css: string): string {
 }
 
 export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
+  const [, siteId] = ticketdeskId.split('_');
   const [isOpen, setIsOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const {
     messages,
     sendMessage,
-    retryMessage,
     startNewChat,
     endCurrentChat,
     loadSession,
@@ -40,7 +41,8 @@ export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
 
   const toggleChatbox = (open: boolean) => {
     if (open) {
-      loadSession();
+      const existingSessionId = getLocalStorage(`ti_${siteId}_session_id`);
+      loadSession(existingSessionId);
     }
     setIsOpen(open);
   };
@@ -80,7 +82,6 @@ export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
         onClose={() => setIsOpen(false)}
         onToggleMaximize={() => setIsMaximized(!isMaximized)}
         onSendMessage={sendMessage}
-        onRetryMessage={retryMessage}
       />
     </shadow.div>
   );
