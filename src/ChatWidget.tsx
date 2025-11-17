@@ -33,8 +33,7 @@ export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
     isConnected,
     isLoading,
     config,
-    operators,
-    lastActive,
+    chatState,
   } = useChatHook({
     ticketdeskId,
   });
@@ -67,8 +66,7 @@ export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
         isMaximized={isMaximized}
         isConnected={isConnected}
         config={config}
-        operators={operators}
-        lastActive={lastActive}
+        chatState={chatState}
         messages={messages}
         sessions={sessions}
         selectedSession={selectedSession}

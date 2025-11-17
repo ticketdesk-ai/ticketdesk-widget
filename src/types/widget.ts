@@ -47,3 +47,9 @@ export interface ChatOperator {
   name: string;
   avatar?: string;
 }
+
+export interface ChatState {
+  lastActive?: number;
+  isTyping: boolean;
+  operators: ChatOperator[];
+}

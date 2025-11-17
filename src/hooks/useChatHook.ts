@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { Message, ChatSession, ChatOperator } from '../types/widget';
+import type { Message, ChatSession, ChatState } from '../types/widget';
 import type { ChatBotConfig } from '../types/widget';
 import { generateId, getLocalStorage, setLocalStorage } from '../utils/helper';
 import { useSocketStore } from './useSocketStore';
@@ -21,12 +21,17 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [clientId, setClientId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [operators, setOperators] = useState<ChatOperator[]>([]);
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(
     null
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [lastActive, setLastActive] = useState<number | undefined>();
+  const [chatState, setChatState] = useState<ChatState>({
+    lastActive: undefined,
+    isTyping: false,
+    operators: [],
+  });
+  const [typingTimeoutRef, setTypingTimeoutRef] =
+    useState<NodeJS.Timeout | null>(null);
 
   const handleIncomingMessage = useCallback(
     (event: any) => {
@@ -52,17 +57,57 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
           }
           setMessages(data.messages || []);
           setSelectedSession(data.session);
-          if (data.operators) setOperators(data.operators);
-          if (data.last_active) setLastActive(data.last_active);
+          if (data.last_active) {
+            setChatState((prev) => ({
+              ...prev,
+              lastActive: data.last_active,
+            }));
+          }
+          if (data.operators) {
+            setChatState((prev) => ({
+              ...prev,
+              operators: data.operators,
+            }));
+          }
           break;
         case 'session:list':
           setSessions(data.sessions);
           break;
-        case 'message:recieved':
-          setMessages((prev) => [...prev, data.message]);
+        case 'message:typing': {
+          // Show typing indicator
+          setChatState((prev) => ({ ...prev, isTyping: true }));
+
+          // Clear existing timeout
+          if (typingTimeoutRef) {
+            clearTimeout(typingTimeoutRef);
+          }
+
+          // Set new timeout for 10 seconds
+          const newTimeout = setTimeout(() => {
+            setChatState((prev) => ({ ...prev, isTyping: false }));
+            setTypingTimeoutRef(null);
+          }, 10000);
+
+          setTypingTimeoutRef(newTimeout);
           break;
+        }
+        case 'message:recieved': {
+          setMessages((prev) => [...prev, data.message]);
+          // Hide typing indicator when message is received
+          setChatState((prev) => ({ ...prev, isTyping: false }));
+          if (typingTimeoutRef) {
+            clearTimeout(typingTimeoutRef);
+            setTypingTimeoutRef(null);
+          }
+          break;
+        }
         case 'operator:list':
-          if (data.operators) setOperators(data.operators);
+          if (data.operators) {
+            setChatState((prev) => ({
+              ...prev,
+              operators: data.operators,
+            }));
+          }
           break;
         case 'message:read':
           setMessages((prev) =>
@@ -75,7 +120,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
           console.log('Unhandled message type:', type, data);
       }
     },
-    [siteId]
+    [siteId, typingTimeoutRef]
   );
 
   useEffect(() => {
@@ -189,11 +234,10 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
     loadSession,
     sessions,
     selectedSession,
-    operators,
     isConnected: socket.readyState === WebSocket.OPEN,
     errorMessage,
     setErrorMessage,
-    lastActive,
+    chatState,
     isLoading,
     config,
     sessionId,

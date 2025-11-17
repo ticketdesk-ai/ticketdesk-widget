@@ -9,7 +9,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { useState } from 'react';
-import type { ChatBotConfig, ChatOperator } from '../types/widget';
+import type { ChatBotConfig, ChatState } from '../types/widget';
 import { formatDistanceToNow } from 'date-fns';
 
 interface HeaderProps {
@@ -17,8 +17,7 @@ interface HeaderProps {
   onToggleMaximize: () => void;
   isMaximized: boolean;
   isConnected: boolean;
-  operators: ChatOperator[];
-  lastActive?: number;
+  chatState: ChatState;
   currentView: 'chat' | 'recent-chats';
   onBackToChat: () => void;
   onStartNewChat: () => void;
@@ -31,9 +30,7 @@ export function Header({
   onClose,
   onToggleMaximize,
   isMaximized,
-  isConnected,
-  operators,
-  lastActive,
+  chatState,
   currentView,
   onBackToChat,
   onStartNewChat,
@@ -53,15 +50,15 @@ export function Header({
   };
 
   const renderConnectionStatus = () => {
-    if (operators.length > 0) {
+    if (chatState.operators?.length > 0) {
       return 'Online';
     }
-    if (lastActive) {
+    if (chatState.lastActive) {
       // human readable last active
-      const lastActiveTime = formatDistanceToNow(lastActive, {
+      const lastActiveTime = formatDistanceToNow(chatState.lastActive, {
         addSuffix: true,
       });
-      return `Last active ${lastActiveTime}`;
+      return `Last seen ${lastActiveTime}`;
     }
     return 'Offline';
   };
@@ -91,7 +88,9 @@ export function Header({
                 <div className="flex items-center gap-2 mt-1">
                   <div
                     className={`w-2 h-2 rounded-full ${
-                      operators.length > 0 ? 'bg-green-400' : 'bg-red-400'
+                      chatState.operators?.length > 0
+                        ? 'bg-green-400'
+                        : 'bg-red-400'
                     }`}
                   />
                   <p className="text-sm opacity-90">
