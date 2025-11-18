@@ -24,6 +24,7 @@ export function MessageInput({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const domain = typeof window !== 'undefined' ? window.location.hostname : '';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,7 +170,7 @@ export function MessageInput({
         {/* Right side: powered by */}
         <div className="flex-1 flex justify-end">
           <a
-            href="https://ticketdesk.ai/?utm_source=chat-widget&utm_medium=referral&utm_campaign=powered-by"
+            href={`https://ticketdesk.ai/?utm_source=chat-widget&utm_medium=${domain}&utm_campaign=powered-by`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-gray-500"

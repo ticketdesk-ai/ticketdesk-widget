@@ -3,11 +3,15 @@ import type { Message, ChatSession, ChatState } from '../types/widget';
 import type { ChatBotConfig } from '../types/widget';
 import { generateId, getLocalStorage, setLocalStorage } from '../utils/helper';
 import { useSocketStore } from './useSocketStore';
+import useSound from 'use-sound';
 
 export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
   const [roomId, siteId] = ticketdeskId.split('_');
   const getSocket = useSocketStore((s) => s.getSocket);
   const socket = getSocket(roomId, siteId);
+  const [playOff] = useSound('https://ticketdesk.ai/sounds/pop-up-off.mp3', {
+    volume: 0.25,
+  });
 
   const [config, setConfig] = useState<ChatBotConfig>({
     name: 'Chat with us',
@@ -46,7 +50,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
           setConfig((prev) => ({ ...prev, ...data.config }));
           setIsLoading(false);
           break;
-        case 'session:joined':
+        case 'session:joined': {
           if (data.session_id) {
             setSessionId(data.session_id);
             setLocalStorage(`ti_${siteId}_session_id`, data.session_id);
@@ -55,7 +59,16 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
             setClientId(data.client_id);
             setLocalStorage(`ti_${siteId}_client_id`, data.client_id);
           }
-          setMessages(data.messages || []);
+
+          const welcomeMessage: Message = {
+            id: generateId(),
+            from: 'agent',
+            content: config.welcome_message!,
+            type: 'text',
+            timestamp: Date.now(),
+          };
+          setMessages([welcomeMessage, ...(data.messages || [])]);
+
           setSelectedSession(data.session);
           if (data.last_active) {
             setChatState((prev) => ({
@@ -70,6 +83,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
             }));
           }
           break;
+        }
         case 'session:list':
           setSessions(data.sessions);
           break;
@@ -99,6 +113,9 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
             clearTimeout(typingTimeoutRef);
             setTypingTimeoutRef(null);
           }
+          if (document.hidden || !document.hasFocus()) {
+            playOff();
+          }
           break;
         }
         case 'operator:list':
@@ -120,7 +137,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
           console.log('Unhandled message type:', type, data);
       }
     },
-    [siteId, typingTimeoutRef]
+    [config.welcome_message, playOff, siteId, typingTimeoutRef]
   );
 
   useEffect(() => {
@@ -141,6 +158,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
     (msg: Message) => {
       if (!sessionId || !clientId) return;
       msg.id = generateId();
+
       setMessages((prev) => [...prev, msg]);
       socket.send(
         JSON.stringify({
@@ -151,6 +169,23 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
           message: msg,
         })
       );
+
+      setTimeout(() => {
+        setMessages((prev) => {
+          const alreadyExists = prev.some((m) => m.type === 'form');
+          if (alreadyExists) return prev;
+
+          const emailPromptMessage: Message = {
+            id: generateId(),
+            from: 'agent',
+            content: 'What is your email address?',
+            type: 'form',
+            fields: ['email'],
+            timestamp: Date.now(),
+          };
+          return [...prev, emailPromptMessage];
+        });
+      }, 1000);
     },
     [socket, sessionId, clientId, siteId]
   );
@@ -165,8 +200,20 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
     };
 
     socket.send(JSON.stringify(payload));
-    setMessages([]);
-  }, [socket, clientId, siteId]);
+
+    if (config.welcome_message) {
+      const welcomeMessage: Message = {
+        id: generateId(),
+        from: 'agent',
+        content: config.welcome_message,
+        type: 'text',
+        timestamp: Date.now(),
+      };
+      setMessages([welcomeMessage]);
+    } else {
+      setMessages([]);
+    }
+  }, [socket, clientId, siteId, config]);
 
   const loadSession = useCallback(
     (newSessionId: string | null) => {

@@ -21,7 +21,7 @@ export function MessageList({
   onSendMessage,
 }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
