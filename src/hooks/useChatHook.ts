@@ -1,18 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Message, ChatSession, ChatState } from '../types/widget';
 import type { ChatBotConfig } from '../types/widget';
-import {
-  generateId,
-  getLocalStorage,
-  playPopOffSound,
-  setLocalStorage,
-} from '../utils/helper';
+import { generateId, getLocalStorage, setLocalStorage } from '../utils/helper';
 import { useSocketStore } from './useSocketStore';
 
 export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
   const [roomId, siteId] = ticketdeskId.split('_');
   const getSocket = useSocketStore((s) => s.getSocket);
   const socket = getSocket(roomId, siteId);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   const [config, setConfig] = useState<ChatBotConfig>({
     name: 'Chat with us',
@@ -37,6 +33,13 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
   });
   const [typingTimeoutRef, setTypingTimeoutRef] =
     useState<NodeJS.Timeout | null>(null);
+
+  const playOff = useCallback(() => {
+    if (audio) {
+      audio.currentTime = 0; // reset
+      audio.play().catch(() => {});
+    }
+  }, [audio]);
 
   const handleIncomingMessage = useCallback(
     (event: any) => {
@@ -83,6 +86,12 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
               operators: data.operators,
             }));
           }
+
+          // Load audio
+          const a = new Audio('https://ticketdesk.ai/sounds/pop-up-off.mp3');
+          a.volume = 0.25;
+          setAudio(a);
+
           break;
         }
         case 'session:list':
@@ -115,8 +124,9 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
             setTypingTimeoutRef(null);
           }
           if (document.hidden || !document.hasFocus()) {
-            playPopOffSound();
+            playOff();
           }
+
           break;
         }
         case 'operator:list':
@@ -138,7 +148,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
           console.log('Unhandled message type:', type, data);
       }
     },
-    [config.welcome_message, siteId, typingTimeoutRef]
+    [config.welcome_message, playOff, siteId, typingTimeoutRef]
   );
 
   useEffect(() => {
