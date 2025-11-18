@@ -1,17 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Message, ChatSession, ChatState } from '../types/widget';
 import type { ChatBotConfig } from '../types/widget';
-import { generateId, getLocalStorage, setLocalStorage } from '../utils/helper';
+import {
+  generateId,
+  getLocalStorage,
+  playPopOffSound,
+  setLocalStorage,
+} from '../utils/helper';
 import { useSocketStore } from './useSocketStore';
-import useSound from 'use-sound';
 
 export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
   const [roomId, siteId] = ticketdeskId.split('_');
   const getSocket = useSocketStore((s) => s.getSocket);
   const socket = getSocket(roomId, siteId);
-  const [playOff] = useSound('https://ticketdesk.ai/sounds/pop-up-off.mp3', {
-    volume: 0.25,
-  });
 
   const [config, setConfig] = useState<ChatBotConfig>({
     name: 'Chat with us',
@@ -114,7 +115,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
             setTypingTimeoutRef(null);
           }
           if (document.hidden || !document.hasFocus()) {
-            playOff();
+            playPopOffSound();
           }
           break;
         }
@@ -137,7 +138,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
           console.log('Unhandled message type:', type, data);
       }
     },
-    [config.welcome_message, playOff, siteId, typingTimeoutRef]
+    [config.welcome_message, siteId, typingTimeoutRef]
   );
 
   useEffect(() => {

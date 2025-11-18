@@ -18,3 +18,9 @@ export const getLocalStorage = (key: string): string | null => {
 export const generateId = (): string => {
   return `m_` + crypto.randomUUID();
 };
+
+export const playPopOffSound = () => {
+  const audio = new Audio('https://ticketdesk.ai/sounds/pop-up-off.mp3');
+  audio.volume = 0.25;
+  audio.play().catch(() => {});
+};
