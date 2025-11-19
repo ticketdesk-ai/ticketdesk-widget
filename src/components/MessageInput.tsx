@@ -5,22 +5,26 @@ import type { ChatBotConfig, ChatSession, Message } from '../types/widget';
 import { AudioRecorder } from './AudioRecorder';
 
 interface MessageInputProps {
-  chatbotId: string;
+  ticketdeskId: string;
   selectedSession: ChatSession | null;
   config: ChatBotConfig;
   onSendMessage: (message: Message) => void;
+  onError: (value: string) => void;
 }
 
 export function MessageInput({
-  chatbotId,
+  ticketdeskId,
   selectedSession,
   config,
   onSendMessage,
+  onError,
 }: MessageInputProps) {
+  const [, siteId] = ticketdeskId.split('_');
   const [input, setInput] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const domain = typeof window !== 'undefined' ? window.location.hostname : '';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +49,7 @@ export function MessageInput({
     const formData = new FormData();
     formData.append('file', file);
     const response = await fetch(
-      `https://api.ticketdesk.ai/v1/uploader?session_id=${selectedSession?.session_id}&site_id=${chatbotId}`,
+      `https://api.ticketdesk.ai/v1/public/upload?session_id=${selectedSession?.session_id}&site_id=${siteId}`,
       {
         method: 'POST',
         body: formData,
@@ -62,6 +66,8 @@ export function MessageInput({
     setIsUploading(true);
     try {
       const fileResponse = await fileUploader(file);
+      if (fileResponse && typeof fileResponse !== 'object') return;
+
       const newMessage: Message = {
         from: 'user',
         content: file.name,
@@ -77,7 +83,7 @@ export function MessageInput({
       };
       onSendMessage(newMessage);
     } catch (error) {
-      console.error('File upload failed:', error);
+      onError(`File upload failed: ${error}`);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -156,18 +162,23 @@ export function MessageInput({
               onClose={() => setShowEmojiPicker(false)}
             />
           )}
-          {isUploading && <span className='text-sm text-gray-700'>Uploading...</span>}
+          {isUploading && (
+            <span className="text-sm text-gray-700">Uploading...</span>
+          )}
         </div>
 
         {/* Right side: powered by */}
         <div className="flex-1 flex justify-end">
           <a
-            href="https://ticketdesk.ai/?utm_source=chat-widget&utm_medium=referral&utm_campaign=powered-by"
+            href={`https://ticketdesk.ai/?utm_source=chat-widget&utm_medium=${domain}&utm_campaign=powered-by`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-xs text-gray-500"
           >
-            Powered by <span className="font-semibold">Ticketdesk AI</span>
+            Powered by{' '}
+            <span className="font-semibold text-gray-700 hover:text-gray-800 transition-colors">
+              Ticketdesk AI
+            </span>
           </a>
         </div>
 

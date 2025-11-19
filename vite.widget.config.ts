@@ -10,11 +10,11 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/widget-entry.tsx'),
-      name: 'ticketdesk-chat',
+      name: 'ticketdesk-widget',
       // Use a function to customize file names per format
       fileName: (format) => {
-        if (format === 'umd') return 'ticketdesk-chat.min.js';
-        return 'ticketdesk-chat.js';
+        if (format === 'umd') return 'ticketdesk-widget.min.js';
+        return 'ticketdesk-widget.js';
       },
       formats: ['umd', 'es'],
     },

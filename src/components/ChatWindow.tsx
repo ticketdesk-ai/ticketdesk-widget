@@ -1,4 +1,4 @@
-import type { Message, ChatSession, ChatOperator } from '../types/widget';
+import type { Message, ChatSession, ChatState } from '../types/widget';
 import { Header } from './Header';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
@@ -6,17 +6,17 @@ import { RecentChats } from './RecentChats';
 import { EmailWarning } from './EmailWarning';
 import { useState } from 'react';
 import type { ChatBotConfig } from '../types/widget';
+import { AlertCircle } from 'lucide-react';
 
 interface ChatWindowProps {
-  chatbotId: string;
+  ticketdeskId: string;
   isOpen: boolean;
   isMaximized: boolean;
   isConnected: boolean;
   config: ChatBotConfig;
   messages: Message[];
   sessions: ChatSession[];
-  operators: ChatOperator[];
-  lastActive?: number;
+  chatState: ChatState;
   selectedSession: ChatSession | null;
   onStartNewChat: () => void;
   onEndChat: () => void;
@@ -27,32 +27,33 @@ interface ChatWindowProps {
     email?: string;
     phone?: string;
   }) => void;
+  errorMessage: string | null;
+  setErrorMessage: (value: string) => void;
   onClose: () => void;
   onToggleMaximize: () => void;
   onSendMessage: (message: Message) => void;
-  onRetryMessage: (messageId: string) => void;
 }
 
 export function ChatWindow({
-  chatbotId,
+  ticketdeskId,
   isOpen,
   isMaximized,
   isConnected,
   config,
   messages,
   sessions,
-  operators,
-  lastActive,
+  chatState,
   selectedSession,
   onStartNewChat,
   onEndChat,
   onLoadSession,
   onGetRecentChats,
   onUpdateProfile,
+  errorMessage,
+  setErrorMessage,
   onClose,
   onToggleMaximize,
   onSendMessage,
-  onRetryMessage,
 }: ChatWindowProps) {
   const [currentView, setCurrentView] = useState<'chat' | 'recent-chats'>(
     'chat'
@@ -100,8 +101,7 @@ export function ChatWindow({
         onToggleMaximize={onToggleMaximize}
         isMaximized={isMaximized}
         isConnected={isConnected}
-        operators={operators}
-        lastActive={lastActive}
+        chatState={chatState}
         currentView={currentView}
         onBackToChat={handleBackToChat}
         onStartNewChat={onStartNewChat}
@@ -114,21 +114,29 @@ export function ChatWindow({
         <>
           <MessageList
             messages={messages}
-            onRetryMessage={onRetryMessage}
             onFormSubmit={handleProfileUpdate}
             config={config}
+            chatState={chatState}
+            onSendMessage={onSendMessage}
           />
 
-          {/* Email warning at bottom */}
           {hasEmailWarning && (
             <EmailWarning config={config} onFormSubmit={handleProfileUpdate} />
           )}
 
+          {errorMessage && (
+            <div className="px-6 py-3 bg-red-100 text-sm border-t border-red-200 text-red-800 hover:text-red-900 flex items-center gap-2 text-left">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              {errorMessage}
+            </div>
+          )}
+
           <MessageInput
-            chatbotId={chatbotId}
+            ticketdeskId={ticketdeskId}
             config={config}
             selectedSession={selectedSession}
             onSendMessage={onSendMessage}
+            onError={setErrorMessage}
           />
         </>
       )}

@@ -52,10 +52,7 @@ export function DynamicForm({ onSubmit, config }: DynamicFormProps) {
 
           <button
             type="submit"
-            style={{
-              backgroundColor: config.color,
-            }}
-            className="px-3 py-2 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-1"
+            className="px-3 py-2 bg-white text-black rounded-lg border border-gray-300 hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-1"
           >
             <ArrowRight className="h-4 w-4" />
           </button>

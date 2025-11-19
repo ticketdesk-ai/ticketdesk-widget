@@ -4,7 +4,7 @@ import { ChatWidget } from './ChatWidget';
 let popupRoot: Root | null = null;
 let container: HTMLElement | null = null;
 
-function initChatbot(chatbotId: string) {
+function initChatbot(ticketdeskId: string) {
   // Avoid duplicate container
   if (!container) {
     container = document.createElement('div');
@@ -25,7 +25,7 @@ function initChatbot(chatbotId: string) {
   };
 
   popupRoot = createRoot(container);
-  popupRoot.render(<ChatWidget chatbotId={chatbotId} />);
+  popupRoot.render(<ChatWidget ticketdeskId={ticketdeskId} />);
   return { close };
 }
 

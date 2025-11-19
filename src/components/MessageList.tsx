@@ -1,24 +1,27 @@
 import { useEffect, useRef } from 'react';
-import type { Message } from '../types/widget';
+import type { ChatState, Message } from '../types/widget';
 import { MessageStatus } from './MessageStatus';
 import { DynamicForm } from './DynamicForm';
 import type { ChatBotConfig } from '../types/widget';
+import { Circle } from 'lucide-react';
 
 interface MessageListProps {
   messages: Message[];
-  onRetryMessage: (messageId: string) => void;
   onFormSubmit: (data: Record<string, string>) => void;
   config: ChatBotConfig;
+  chatState: ChatState;
+  onSendMessage: (message: Message) => void;
 }
 
 export function MessageList({
   messages,
-  onRetryMessage,
   onFormSubmit,
   config,
+  chatState,
+  onSendMessage,
 }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -87,8 +90,8 @@ export function MessageList({
               className={`rounded-2xl ${
                 message.type === 'text' || message.type === 'form'
                   ? message.from === 'user'
-                    ? 'p-4 bg-blue-500 text-white rounded-br-sm'
-                    : 'p-4 bg-gray-100 text-gray-800 rounded-bl-sm'
+                    ? 'p-4 bg-gray-100 text-gray-800 rounded-bl-sm'
+                    : 'p-4 bg-blue-500 text-white rounded-br-sm'
                   : ''
               }`}
             >
@@ -101,7 +104,7 @@ export function MessageList({
                 timestamp={message.timestamp}
                 onRetry={
                   message.status === 'failed'
-                    ? () => onRetryMessage(message.id!)
+                    ? () => onSendMessage(message)
                     : undefined
                 }
               />
@@ -109,6 +112,14 @@ export function MessageList({
           </div>
         </div>
       ))}
+
+      {chatState.isTyping && (
+        <div className="inline-flex items-center gap-1 bg-blue-500 text-white px-3 py-2 rounded-full">
+          <Circle className="size-2 animate-bounce [animation-delay:-0.2s] stroke-none fill-current" />
+          <Circle className="size-2 animate-bounce [animation-delay:-0.1s] stroke-none fill-current" />
+          <Circle className="size-2 animate-bounce stroke-none fill-current" />
+        </div>
+      )}
 
       <div ref={messagesEndRef} />
     </div>
