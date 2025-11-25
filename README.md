@@ -1,8 +1,8 @@
-# Ticketdesk Chat
+# Ticketdesk AI Chat Widget
 
-[![version](https://img.shields.io/npm/v/ticketdesk-chat.svg)](https://www.npmjs.com/package/ticketdesk-chat)
-[![license](https://img.shields.io/npm/l/ticketdesk-chat.svg)](https://www.npmjs.com/package/ticketdesk-chat)
-[![hits per month](https://data.jsdelivr.com/v1/package/npm/ticketdesk-chat/badge)](https://www.jsdelivr.com/package/npm/ticketdesk-chat)
+[![version](https://img.shields.io/npm/v/ticketdesk-widget.svg)](https://www.npmjs.com/package/ticketdesk-widget)
+[![license](https://img.shields.io/npm/l/ticketdesk-widget.svg)](https://www.npmjs.com/package/ticketdesk-widget)
+[![hits per month](https://data.jsdelivr.com/v1/package/npm/ticketdesk-widget/badge)](https://www.jsdelivr.com/package/npm/ticketdesk-widget)
 
 Ticketdesk chat widget to embed on any website for live customer support + AI chatbot helpdesk, providing instant automated responses, smart self-service, and handoff to human agents when needed for a superior customer support experience.
 
@@ -21,9 +21,9 @@ You can:
 ## 🚀 Setup Instructions
 
 1. Login to your [Ticketdesk AI](https://ticketdesk.ai) account.
-2. Create a Chatbot from Settings > Chatbots.
-3. Copy your Chatbot ID  
-   (e.g: `cb_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).
+2. Create a Sites from Settings > Sites.
+3. Copy your Ticketdesk ID  
+   (e.g: `d-xxxx-xxxx-s-xxxxsxxx`).
 4. Paste the ID into the script inside your webpage.
 
 ---
@@ -34,15 +34,15 @@ You can load the chatbot script directly from the Ticketdesk AI CDN:
 
 ```html
 <script>
-  window.TICKETDESK_CHATBOT_ID = 'cb_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'; // Replace with your ID
+  window.TICKETDESK_ID = 'd-xxxx-xxxx-s-xxxxsxxx'; // Replace with your ID
 </script>
-<script src="https://ticketdesk.ai/ticketdesk-chat.min.js"></script>
+<script src="https://ticketdesk.ai/ticketdesk-widget.min.js"></script>
 ```
 
-Or, download the `ticketdesk-chat.min.js` locally.
+Or, download the `ticketdesk-widget.min.js` locally.
 
 ```
-<script src="/js/ticketdesk-chat.min.js"></script>
+<script src="/js/ticketdesk-widget.min.js"></script>
 ```
 
 ## Support
