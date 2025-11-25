@@ -1,4 +1,4 @@
-# Ticketdesk AI Chat Widget
+# Ticketdesk Widget
 
 [![version](https://img.shields.io/npm/v/ticketdesk-widget.svg)](https://www.npmjs.com/package/ticketdesk-widget)
 [![license](https://img.shields.io/npm/l/ticketdesk-widget.svg)](https://www.npmjs.com/package/ticketdesk-widget)
