@@ -21,7 +21,7 @@ export function MessageList({
   onSendMessage,
 }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -91,9 +91,14 @@ export function MessageList({
                 message.type === 'text' || message.type === 'form'
                   ? message.from === 'user'
                     ? 'p-4 bg-gray-100 text-gray-800 rounded-bl-sm'
-                    : 'p-4 bg-blue-500 text-white rounded-br-sm'
+                    : 'p-4 text-white rounded-br-sm'
                   : ''
               }`}
+              style={
+                message.from !== 'user'
+                  ? { backgroundColor: config.color }
+                  : undefined
+              }
             >
               {renderMessageContent(message)}
             </div>
