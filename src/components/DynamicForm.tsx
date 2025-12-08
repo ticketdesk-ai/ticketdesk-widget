@@ -34,8 +34,8 @@ export function DynamicForm({ onSubmit, config }: DynamicFormProps) {
 
   return (
     <div className="py-2">
-      <form onSubmit={handleSubmit} className="flex items-center gap-3">
-        <div className="flex-1 flex items-center gap-2">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
+        <div className="flex flex-col gap-3 w-full">
           {config.fields?.map((field) => (
             <input
               key={field}
@@ -43,20 +43,20 @@ export function DynamicForm({ onSubmit, config }: DynamicFormProps) {
               value={formData[field]}
               onChange={(e) => handleChange(field, e.target.value)}
               placeholder={`Your ${field}`}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-opacity-50"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-opacity-50"
               style={{ '--tw-ring-color': config.color } as React.CSSProperties}
               disabled={isSubmitting}
               required
             />
           ))}
-
-          <button
-            type="submit"
-            className="px-3 py-2 bg-white text-black rounded-lg border border-gray-300 hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-1"
-          >
-            <ArrowRight className="h-4 w-4" />
-          </button>
         </div>
+
+        <button
+          type="submit"
+          className="self-start px-3 py-2 text-sm bg-white text-black rounded-lg border border-gray-300 hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center"
+        >
+          Submit <ArrowRight className="ml-2 h-4 w-4" />
+        </button>
       </form>
     </div>
   );

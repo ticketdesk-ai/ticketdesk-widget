@@ -15,6 +15,7 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
     color: '#3b82f6',
     shape: 'round',
     welcome_message: 'Hi there!',
+    fields: ['email'],
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -165,6 +166,18 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
     if (cId) setClientId(cId);
   }, [siteId]);
 
+  const getPreetyContent = (fields: string[]) => {
+    const pretty = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
+    const last = fields.at(-1)!;
+    const fieldsList =
+      fields.length === 1
+        ? pretty(fields[0])
+        : `${fields.slice(0, -1).map(pretty).join(', ')} and ${pretty(last)}`;
+
+    return `Please provide your ${fieldsList}.`;
+  };
+
   const sendMessage = useCallback(
     (msg: Message) => {
       if (!sessionId || !clientId) return;
@@ -181,24 +194,26 @@ export function useChatHook({ ticketdeskId }: { ticketdeskId: string }) {
         })
       );
 
-      setTimeout(() => {
-        setMessages((prev) => {
-          const alreadyExists = prev.some((m) => m.type === 'form');
-          if (alreadyExists) return prev;
+      if (config.fields?.length) {
+        setTimeout(() => {
+          setMessages((prev) => {
+            const alreadyExists = prev.some((m) => m.type === 'form');
+            if (alreadyExists) return prev;
 
-          const emailPromptMessage: Message = {
-            id: generateId(),
-            from: 'agent',
-            content: 'What is your email address?',
-            type: 'form',
-            fields: ['email'],
-            timestamp: Date.now(),
-          };
-          return [...prev, emailPromptMessage];
-        });
-      }, 1000);
+            const emailPromptMessage: Message = {
+              id: generateId(),
+              from: 'agent',
+              content: getPreetyContent(config.fields!),
+              type: 'form',
+              fields: config.fields,
+              timestamp: Date.now(),
+            };
+            return [...prev, emailPromptMessage];
+          });
+        }, 1000);
+      }
     },
-    [socket, sessionId, clientId, siteId]
+    [socket, sessionId, clientId, siteId, config.fields]
   );
 
   const startNewChat = useCallback(() => {
