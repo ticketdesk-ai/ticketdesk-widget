@@ -51,15 +51,13 @@ export function ChatWidget({ ticketdeskId }: { ticketdeskId: string }) {
   }
 
   return (
-    <shadow.div>
+    <shadow.div style={{ display: 'block' }}>
       <style>{normalizeTailwind(styles)}</style>
-
       <ChatButton
         isOpen={isOpen}
         onClick={() => toggleChatbox(!isOpen)}
         config={config}
       />
-
       <ChatWindow
         ticketdeskId={ticketdeskId}
         isOpen={isOpen}
